@@ -58,6 +58,7 @@ export default function FlipCard({
   const [dragging, setDragging] = useState(false);
   const shown = controlled ? flipped : inner;
   const shownRef = useRef(shown);
+  // eslint-disable-next-line react-hooks/refs
   shownRef.current = shown;
   const rootRef = useRef(null);
   const grip = useRef(null);
@@ -123,7 +124,9 @@ export default function FlipCard({
     if (disabled || e.button !== 0 || grip.current) return;
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {}
+    } catch {
+      // Algunos navegadores no permiten capturar el puntero: se ignora.
+    }
     spin.current?.stop();
     grip.current = {
       id: e.pointerId,
@@ -172,7 +175,9 @@ export default function FlipCard({
     grip.current = null;
     try {
       if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {}
+    } catch {
+      // Algunos navegadores no permiten capturar el puntero: se ignora.
+    }
     setDragging(false);
     if (e.pointerType === 'touch' || !rootRef.current?.matches(':hover')) rest();
     if (!g.moved) {
