@@ -1,34 +1,37 @@
-import { HospitalizacionesRepository } from '../repositories/hospitalizaciones.repository.js';
+import HospitalizacionService from '../services/hospitalizacionService.js';
 
-const repo = new HospitalizacionesRepository();
+const servicioHospitalizacion = new HospitalizacionService();
 
+// Obtiene la lista completa de hospitalizaciones
 export const getHospitalizaciones = async (req, res) => {
   try {
-    const lista = await repo.obtenerTodas();
-    res.json(lista);
+    const listaHospitalizaciones = await servicioHospitalizacion.listarHospitalizaciones();
+    res.json(listaHospitalizaciones);
   } catch (error) {
     console.error('Error al obtener hospitalizaciones:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
 
+// Registra el ingreso de una nueva hospitalizaciones
 export const createHospitalizacion = async (req, res) => {
   try {
-    const nueva = await repo.crear(req.body);
-    res.status(201).json(nueva);
+    const nuevaHospitalizacion = await servicioHospitalizacion.registrarIngreso(req.body);
+    res.status(201).json(nuevaHospitalizacion);
   } catch (error) {
     console.error('Error al registrar hospitalización:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(400).json({ error: error.message || 'Error interno del servidor' });
   }
 };
 
+// Registra el alta o eliminación de la hospitalización
 export const deleteHospitalizacion = async (req, res) => {
   try {
     const { id } = req.params;
-    await repo.eliminar(id);
+    await servicioHospitalizacion.darDeAlta(id);
     res.json({ mensaje: 'Paciente dado de alta correctamente' });
   } catch (error) {
     console.error('Error al dar de alta:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(400).json({ error: error.message || 'Error interno del servidor' });
   }
 };

@@ -1,10 +1,8 @@
-import { HospitalizacionesRepository } from '../repositories/hospitalizaciones.repository.js';
+import hospitalizacionesRepository from '../repositories/hospitalizaciones.repository.js';
 
-const hospitalizacionesRepo = new HospitalizacionesRepository();
-
-export class HospitalizacionService {
+export default class HospitalizacionService {
   async listarHospitalizaciones() {
-    return await hospitalizacionesRepo.obtenerTodas();
+    return await hospitalizacionesRepository.obtenerTodas();
   }
 
   async registrarIngreso(datos) {
@@ -15,13 +13,13 @@ export class HospitalizacionService {
       throw new Error('El motivo de hospitalización es obligatorio.');
     }
 
-    return await hospitalizacionesRepo.crear(datos);
+    return await hospitalizacionesRepository.crear(datos);
   }
 
   async darDeAlta(id) {
     if (!id) {
       throw new Error('Se requiere el ID para dar de alta.');
     }
-    return await hospitalizacionesRepo.eliminar(id);
+    return await hospitalizacionesRepository.eliminar(id);
   }
 }
