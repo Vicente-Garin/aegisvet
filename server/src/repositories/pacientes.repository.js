@@ -1,63 +1,27 @@
 import pool from '../config/db.js';
 
-export class PacientesRepository {
+class PacientesRepository {
   async obtenerTodos() {
-    const query = 'SELECT * FROM pacientes ORDER BY id DESC;';
-    const { rows } = await pool.query(query);
-    return rows;
+    const resultado = await pool.query('SELECT * FROM pacientes ORDER BY id DESC');
+    return resultado.rows;
   }
 
-  async obtenerPorId(id) {
-    const query = 'SELECT * FROM pacientes WHERE id = $1;';
-    const { rows } = await pool.query(query, [id]);
-    return rows[0];
-  }
-
-  async crear(paciente) {
-    const { 
-      nombre, 
-      numero_atencion, 
-      especie, 
-      raza, 
-      edad, 
-      nombre_dueno, 
-      telefono, 
-      foto 
-    } = paciente;
-
-    const query = `
-      INSERT INTO pacientes (
-        nombre, 
-        numero_atencion, 
-        especie, 
-        raza, 
-        edad, 
-        nombre_dueno, 
-        telefono, 
-        foto
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *;
+  async crear(datos) {
+    const { nombre, especie, raza, edad, nombre_dueno, telefono_dueno } = datos;
+    const consulta = `
+      INSERT INTO pacientes (nombre, especie, raza, edad, nombre_dueno, telefono_dueno)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *
     `;
-
-    const values = [
-      nombre, 
-      numero_atencion, 
-      especie, 
-      raza || 'Mestizo', 
-      edad, 
-      nombre_dueno || 'No registrado', 
-      telefono || 'Sin contacto', 
-      foto
-    ];
-
-    const { rows } = await pool.query(query, values);
-    return rows[0];
+    const valores = [nombre, especie, raza, edad, nombre_dueno, telefono_dueno];
+    const resultado = await pool.query(consulta, valores);
+    return resultado.rows[0];
   }
 
   async eliminar(id) {
-    const query = 'DELETE FROM pacientes WHERE id = $1 RETURNING *;';
-    const { rows } = await pool.query(query, [id]);
-    return rows[0];
+    const resultado = await pool.query('DELETE FROM pacientes WHERE id = $1 RETURNING *', [id]);
+    return resultado.rows[0];
   }
 }
+
+export default new PacientesRepository();

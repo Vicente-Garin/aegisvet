@@ -1,6 +1,6 @@
-import { pacientesRepository } from '../repositories/pacientes.repository.js';
+import pacientesRepository from '../repositories/pacientes.repository.js';
 
-export class PacientesService {
+export default class PacientesService {
   async obtenerTodos() {
     return await pacientesRepository.obtenerTodos();
   }
