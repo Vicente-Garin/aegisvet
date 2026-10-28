@@ -1,6 +1,6 @@
 import pool from '../config/db.js';
 
-export class HospitalizacionesRepository {
+class HospitalizacionesRepository {
   async obtenerTodas() {
     const query = `
       SELECT 
@@ -40,3 +40,5 @@ export class HospitalizacionesRepository {
     return rows[0];
   }
 }
+
+export default new HospitalizacionesRepository();
