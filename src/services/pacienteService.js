@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/pacientes';
+const API_URL = 'https://vetchiloe-psbq.onrender.com/api/hospitalizaciones';
 
 export const obtenerPacientes = async () => {
   const respuesta = await fetch(API_URL);

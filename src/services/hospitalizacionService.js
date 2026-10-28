@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api/hospitalizaciones';
+const API_URL = 'https://vetchiloe-psbq.onrender.com/api/hospitalizaciones';
 
 export const obtenerHospitalizados = async () => {
   const res = await fetch(API_URL);
