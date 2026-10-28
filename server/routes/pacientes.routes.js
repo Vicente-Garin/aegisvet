@@ -1,9 +1,10 @@
-﻿import { Router } from 'express';
-import { pacienteController } from '../controllers/pacientes.controller.js';
+﻿const express = require('express');
+const router = express.Router();
+const controller = require('../controllers/pacientes.controller');
 
-const router = Router();
+router.get('/', controller.listar);
+router.get('/buscar', controller.buscar);
+router.get('/resumen', controller.resumen);
+router.post('/', controller.registrar);
 
-router.get('/', pacienteController.listar);
-router.post('/', pacienteController.crear);
-
-export default router;
+module.exports = router;

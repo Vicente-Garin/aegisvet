@@ -1,38 +1,42 @@
-﻿import pg from 'pg';
-import dotenv from 'dotenv';
-dotenv.config();
+﻿const { Pool } = require('pg');
+require('dotenv').config();
 
-const { Pool } = pg;
-
-export const pool = new Pool({
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 });
 
-export const obtenerTodos = async () => {
-  const query = 'SELECT * FROM pacientes ORDER BY id ASC';
-  const { rows } = await pool.query(query);
-  return rows;
+const obtenerTodos = async () => {
+  const resultado = await pool.query('SELECT * FROM pacientes ORDER BY id DESC');
+  return resultado.rows;
 };
 
-export const guardar = async (paciente) => {
-  const query = `
-    INSERT INTO pacientes (nombre, numero_atencion, especie, edad, diagnostico, foto)
-    VALUES ($1, $2, $3, $4, $5, $6)
-    RETURNING *;
-  `;
-  const values = [
+const buscar = async (texto) => {
+  const resultado = await pool.query('SELECT * FROM buscar_pacientes($1)', [texto]);
+  return resultado.rows;
+};
+
+const guardar = async (paciente) => {
+  const query = 'SELECT * FROM registrar_paciente($1, $2, $3, $4, $5)';
+  const valores = [
     paciente.nombre,
-    paciente.numero_atencion,
     paciente.especie,
     paciente.edad,
     paciente.diagnostico,
     paciente.foto
   ];
-  const { rows } = await pool.query(query, values);
-  return rows[0];
+  const resultado = await pool.query(query, valores);
+  return resultado.rows[0];
 };
 
-export default { obtenerTodos, guardar, pool };
+const obtenerResumen = async () => {
+  const resultado = await pool.query('SELECT * FROM resumen_por_especie()');
+  return resultado.rows;
+};
+
+module.exports = {
+  obtenerTodos,
+  buscar,
+  guardar,
+  obtenerResumen
+};

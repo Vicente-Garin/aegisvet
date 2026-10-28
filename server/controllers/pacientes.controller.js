@@ -1,34 +1,45 @@
-﻿import pacientesService from '../services/pacientes.service.js';
+﻿const service = require('../services/pacientes.service');
 
-export const listar = async (req, res) => {
+const listar = async (req, res) => {
   try {
-    const pacientes = await pacientesService.listarPacientes();
-    res.json(pacientes);
+    const data = await service.listarPacientes();
+    res.json(data);
   } catch (error) {
-    console.error("ERROR EN LISTAR PACIENTES:", error);
-    res.status(500).json({
-      error: "Error interno del servidor al listar pacientes",
-      detalle: error.message
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
-export const crear = async (req, res) => {
+const buscar = async (req, res) => {
   try {
-    const nuevoPaciente = await pacientesService.registrarPaciente(req.body);
-    res.status(201).json(nuevoPaciente);
+    const texto = req.query.q || '';
+    const data = await service.buscarPacientes(texto);
+    res.json(data);
   } catch (error) {
-    console.error("ERROR AL CREAR PACIENTE:", error);
-    res.status(500).json({
-      error: "Error al registrar el paciente",
-      detalle: error.message
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
-export const pacienteController = {
+const registrar = async (req, res) => {
+  try {
+    const data = await service.registrarPaciente(req.body);
+    res.status(201).json(data);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+const resumen = async (req, res) => {
+  try {
+    const data = await service.obtenerResumenEspecies();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
   listar,
-  crear
+  buscar,
+  registrar,
+  resumen
 };
-
-export default pacienteController;

@@ -1,33 +1,31 @@
-﻿import * as repository from '../repositories/pacientes.repository.js';
+﻿const repository = require('../repositories/pacientes.repository');
 
-const ESPECIES_VALIDAS = ['Felino', 'Canino', 'Ave', 'Exótico'];
-
-export const listarPacientes = async () => {
+const listarPacientes = async () => {
   return await repository.obtenerTodos();
 };
 
-export const registrarPaciente = async (datos) => {
-  if (!datos.nombre || !datos.especie) {
-    throw new Error('Faltan datos obligatorios');
-  }
-
-  const especieNormalizada = datos.especie.charAt(0).toUpperCase() + datos.especie.slice(1).toLowerCase();
-  if (!ESPECIES_VALIDAS.includes(especieNormalizada)) {
-    throw new Error('Especie no permitida');
-  }
-
-  const pacientes = await repository.obtenerTodos();
-  const siguienteNumero = pacientes.length + 1;
-  const correlativo = `2026-A${siguienteNumero}`;
-
-  const nuevoPaciente = {
-    ...datos,
-    especie: especieNormalizada,
-    numero_atencion: correlativo
-  };
-
-  return await repository.guardar(nuevoPaciente);
+const buscarPacientes = async (texto) => {
+  return await repository.buscar((texto || '').trim());
 };
 
-export const pacienteService = { listarPacientes, registrarPaciente };
-export default pacienteService;
+const registrarPaciente = async (datos) => {
+  if (!datos.nombre || !datos.especie) {
+    throw new Error('Nombre y especie son obligatorios');
+  }
+  return await repository.guardar(datos);
+};
+
+const obtenerResumenEspecies = async () => {
+  const filas = await repository.obtenerResumen();
+  return filas.map(f => ({
+    especie: f.especie,
+    total: Number(f.total)
+  }));
+};
+
+module.exports = {
+  listarPacientes,
+  buscarPacientes,
+  registrarPaciente,
+  obtenerResumenEspecies
+};
