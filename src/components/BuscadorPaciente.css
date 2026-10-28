@@ -1,0 +1,21 @@
+.buscador-paciente {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--aegis-border, #e2e8f0);
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--aegis-dark, #0f172a);
+  font: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.buscador-paciente::placeholder {
+  color: var(--aegis-muted, #64748b);
+}
+
+.buscador-paciente:focus {
+  outline: none;
+  border-color: var(--aegis-accent, #0284c7);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}

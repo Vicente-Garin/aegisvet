@@ -117,6 +117,33 @@ body {
   color: var(--aegis-muted);
 }
 
+.herramientas-pacientes {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.5rem 0;
+}
+
+.resumen-especies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge-resumen-especie {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--aegis-border);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--aegis-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.contador-pacientes {
+  color: var(--aegis-muted);
+  font-size: 0.85rem;
+}
+
 /* Lámina 110: Botón Flotante (FAB) */
 .fab-registrar {
   position: fixed;

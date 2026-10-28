@@ -1,9 +1,14 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import * as XLSX from 'xlsx';
 import { TablaPacientes } from './components/TablaPacientes';
 import { PacienteCard } from './components/PacienteCard';
 import { FormularioPaciente } from './components/FormularioPaciente';
-import { pacienteService } from './services/pacienteService';
+import { BuscadorPaciente } from './components/BuscadorPaciente';
+import {
+  createPaciente,
+  getPacientes,
+  getResumenEspecies
+} from './services/pacienteService';
 import './App.css';
 
 function LogoAegis() {
@@ -29,34 +34,50 @@ function LogoAegis() {
 
 function App() {
   const [pacientes, setPacientes] = useState([]);
+  const [busqueda, setBusqueda] = useState('');
+  const [resumen, setResumen] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [pacienteCarnet, setPacienteCarnet] = useState(null);
   const [pacienteAEliminar, setPacienteAEliminar] = useState(null);
 
-  // Lámina 127: useEffect para cargar datos al montar
+  const cargarPacientesYResumen = useCallback(async () => {
+    const [datos, resumenEspecies] = await Promise.all([
+      getPacientes(),
+      getResumenEspecies()
+    ]);
+    setPacientes(datos);
+    setResumen(resumenEspecies);
+  }, []);
+
   useEffect(() => {
     async function cargar() {
       try {
-        const datos = await pacienteService.obtenerPacientes();
-        setPacientes(datos);
+        await cargarPacientesYResumen();
       } catch (err) {
-        console.error('Error cargando pacientes:', err);
+        console.error('Error cargando pacientes y resumen:', err);
       } finally {
         setCargando(false);
       }
     }
     cargar();
-  }, []);
+  }, [cargarPacientesYResumen]);
 
-  const totalFelinos = pacientes.filter(p => p.especie?.toLowerCase().includes('felino')).length;
-  const totalCaninos = pacientes.filter(p => p.especie?.toLowerCase().includes('canino')).length;
+  const filtrados = pacientes.filter((p) =>
+    `${p.nombre} ${p.especie}`.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   const handleAgregarPaciente = async (nuevo) => {
     try {
-      const agregado = await pacienteService.registrarPaciente(nuevo);
+      const agregado = await createPaciente(nuevo);
       setPacientes((prev) => [agregado, ...prev]);
       setMostrarFormulario(false);
+      try {
+        await cargarPacientesYResumen();
+      } catch (err) {
+        console.error('Paciente registrado, pero no se pudieron actualizar los datos:', err);
+        alert('El paciente se registró, pero no se pudo actualizar el listado y el resumen.');
+      }
     } catch (err) {
       alert(err.message || 'Error al registrar paciente');
     }
@@ -126,8 +147,6 @@ function App() {
           <div className="cabecera-controles">
             <div className="chips-resumen">
               <span className="chip-stat"><strong>{pacientes.length}</strong> Carnets</span>
-              <span className="chip-stat"><strong>{totalFelinos}</strong> Felinos</span>
-              <span className="chip-stat"><strong>{totalCaninos}</strong> Caninos</span>
             </div>
 
             <button
@@ -149,13 +168,31 @@ function App() {
           </div>
         </div>
 
+        <section className="herramientas-pacientes" aria-label="Búsqueda y resumen de pacientes">
+          <div className="resumen-especies">
+            {resumen.map((fila) => (
+              <span className="badge-resumen-especie" key={fila.especie}>
+                {fila.especie}: {fila.total}
+              </span>
+            ))}
+          </div>
+          <BuscadorPaciente texto={busqueda} onCambiar={setBusqueda} />
+          <p className="contador-pacientes">
+            {filtrados.length} de {pacientes.length} pacientes
+          </p>
+        </section>
+
         {cargando ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
             <p>Cargando registros clínicos desde la capa de servicios...</p>
           </div>
+        ) : filtrados.length === 0 ? (
+          <div className="tabla-vacia-box">
+            <p>No se encontraron pacientes</p>
+          </div>
         ) : (
           <TablaPacientes
-            pacientes={pacientes}
+            pacientes={filtrados}
             onVerFicha={(p) => setPacienteCarnet(p)}
             onSolicitarEliminar={(p) => setPacienteAEliminar(p)}
           />
