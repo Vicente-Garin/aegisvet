@@ -1,4 +1,4 @@
-import { PacientesService } from '../services/pacientes.service.js';
+import PacientesService from '../services/pacientes.service.js';
 
 const service = new PacientesService();
 
