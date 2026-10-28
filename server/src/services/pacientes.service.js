@@ -1,37 +1,15 @@
-const API_URL = 'http://localhost:3001/api/pacientes';
+import { pacientesRepository } from '../repositories/pacientes.repository.js';
 
-export const obtenerPacientes = async () => {
-  const respuesta = await fetch(API_URL);
-  if (!respuesta.ok) {
-    throw new Error('Error al consultar la lista de pacientes');
-  }
-  return await respuesta.json();
-};
-
-export const registrarPaciente = async (nuevoPaciente) => {
-  const respuesta = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(nuevoPaciente),
-  });
-
-  if (!respuesta.ok) {
-    throw new Error('No se pudo guardar la información del paciente');
+export class PacientesService {
+  async obtenerTodos() {
+    return await pacientesRepository.obtenerTodos();
   }
 
-  return await respuesta.json();
-};
-
-export const eliminarPaciente = async (id) => {
-  const respuesta = await fetch(`${API_URL}/${id}`, {
-    method: 'DELETE',
-  });
-
-  if (!respuesta.ok) {
-    throw new Error('No se pudo eliminar el paciente');
+  async crear(datosPaciente) {
+    return await pacientesRepository.crear(datosPaciente);
   }
 
-  return await respuesta.json();
-};
+  async eliminar(id) {
+    return await pacientesRepository.eliminar(id);
+  }
+}

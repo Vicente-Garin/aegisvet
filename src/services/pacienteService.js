@@ -1,23 +1,37 @@
-// src/services/pacienteService.js
-const API_URL = 'http://localhost:3001/api/pacientes'; // <--- Cambiado a 3001
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/pacientes';
 
 export const obtenerPacientes = async () => {
-  const res = await fetch(API_URL);
-  if (!res.ok) throw new Error('Error al obtener pacientes');
-  return await res.json();
+  const respuesta = await fetch(API_URL);
+  if (!respuesta.ok) {
+    throw new Error('Error al consultar la lista de pacientes');
+  }
+  return await respuesta.json();
 };
 
-export const registrarPaciente = async (paciente) => {
-  const res = await fetch(API_URL, {
+export const registrarPaciente = async (nuevoPaciente) => {
+  const respuesta = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(paciente),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(nuevoPaciente),
   });
 
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || 'Error al registrar paciente');
+  if (!respuesta.ok) {
+    throw new Error('No se pudo guardar la información del paciente');
   }
 
-  return await res.json();
+  return await respuesta.json();
+};
+
+export const eliminarPaciente = async (id) => {
+  const respuesta = await fetch(`${API_URL}/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!respuesta.ok) {
+    throw new Error('No se pudo eliminar el paciente');
+  }
+
+  return await respuesta.json();
 };
