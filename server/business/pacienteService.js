@@ -1,4 +1,9 @@
-import { insertarPaciente, obtenerPacientePorId as buscarPacientePorId, obtenerPacientes } from '../data/pacienteRepository.js'
+import {
+  existeRut,
+  insertarPaciente,
+  obtenerPacientePorId as buscarPacientePorId,
+  obtenerPacientes
+} from '../data/pacienteRepository.js'
 
 const normalizarRut = rut => rut.replace(/[.\s-]/g, '').toUpperCase();
 
@@ -34,6 +39,12 @@ const calcularEdad = fecha => {
   return `${anios} ${anios === 1 ? 'año' : 'años'}`;
 };
 
+const conEdadActual = paciente => (
+  paciente && paciente.fecha_nacimiento
+    ? { ...paciente, edad: calcularEdad(paciente.fecha_nacimiento) }
+    : paciente
+);
+
 const fechaNacimientoValida = fecha => {
   if (typeof fecha !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false;
 
@@ -42,15 +53,7 @@ const fechaNacimientoValida = fecha => {
     && fechaParseada.toISOString().slice(0, 10) === fecha;
 };
 
-const generarNumeroAtencion = pacientes => {
-  const anio = new Date().getFullYear();
-  const siguienteNumero = pacientes.reduce((mayorNumero, paciente) => {
-    const coincidencia = paciente.numero_atencion?.match(/^\d{4}-A(\d+)$/);
-    return coincidencia ? Math.max(mayorNumero, Number(coincidencia[1])) : mayorNumero;
-  }, 0) + 1;
 
-  return `${anio}-A${siguienteNumero}`;
-};
 
 let registroEnCurso = Promise.resolve();
 
@@ -143,11 +146,8 @@ const registrarPacienteEnOrden = async datosFormulario => {
     };
   }
 
-  const pacientes = await obtenerPacientes();
-  const rutDuplicado = pacientes.some(
-    paciente => paciente.rut && normalizarRut(paciente.rut) === rutIngresado
-  );
-  if (rutDuplicado) {
+    const rut = `${rutIngresado.slice(0, -1)}-${rutIngresado.slice(-1)}`;
+  if (await existeRut(rut)) {
     return {
       ok: false,
       status: 409,
@@ -158,29 +158,23 @@ const registrarPacienteEnOrden = async datosFormulario => {
     };
   }
 
-  const id = pacientes.reduce((mayorId, paciente) => Math.max(mayorId, Number(paciente.id) || 0), 0) + 1;
   const { modoEdad, ...datosPaciente } = datosFormulario;
-  const rut = `${rutIngresado.slice(0, -1)}-${rutIngresado.slice(-1)}`;
   const paciente = {
     ...datosPaciente,
     foto: datosPaciente.foto || 'sin-foto.svg',
-    edad: modoEdad === 'fecha'
-      ? calcularEdad(datosFormulario.fecha_nacimiento)
-      : edadManual,
+    edad: modoEdad === 'fecha' ? null : edadManual,
     peso,
     diagnostico: datosFormulario.diagnostico?.trim() || '',
     fecha_nacimiento: modoEdad === 'fecha' ? datosFormulario.fecha_nacimiento : '',
-    rut,
-    id,
-    numero_atencion: generarNumeroAtencion(pacientes)
+    rut
   };
 
-  await insertarPaciente(paciente);
-  return { ok: true, paciente };
+  const pacienteGuardado = await insertarPaciente(paciente);
+  return { ok: true, paciente: conEdadActual(pacienteGuardado) };
 };
 
-export const listarPacientes = () => obtenerPacientes();
-export const obtenerPacientePorId = id => buscarPacientePorId(id);
+export const listarPacientes = async () => (await obtenerPacientes()).map(conEdadActual);
+export const obtenerPacientePorId = async id => conEdadActual(await buscarPacientePorId(id));
 
 export const registrarPaciente = datosFormulario => {
   const siguienteRegistro = registroEnCurso.then(
@@ -189,3 +183,4 @@ export const registrarPaciente = datosFormulario => {
   registroEnCurso = siguienteRegistro.then(() => undefined, () => undefined);
   return siguienteRegistro;
 };
+
