@@ -3,15 +3,7 @@ import './App.css'
 import FlipCard from './components/FlipCard.jsx'
 import FormularioPaciente from './components/FormularioPaciente.jsx'
 import { guardarPaciente, obtenerPacientes } from './data/pacienteApi.js'
-import charkicitoImage from './assets/images/charkicito.jpg'
-import mercedesImage from './assets/images/mercedes.jpg'
-import hannitaImage from './assets/images/hannita.jpg'
-import imagenSinFoto from './assets/images/sin-foto.svg'
-
 const imagenesPacientes = {
-  'charkicito.jpg': charkicitoImage,
-  'mercedes.jpg': mercedesImage,
-  'hannita.jpg': hannitaImage,
   'sin-foto.svg': imagenSinFoto
 };
 

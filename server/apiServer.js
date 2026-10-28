@@ -6,6 +6,7 @@ import pacientesRoutes from './routes/pacientes.routes.js'
 const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 const production = process.argv.includes('--production');
 const port = Number(process.env.API_PORT || process.env.PORT || (production ? 4173 : 3001));
+const host = production ? '0.0.0.0' : '127.0.0.1';
 const app = express();
 
 app.disable('x-powered-by');
@@ -53,7 +54,7 @@ app.use((error, req, res, next) => {
   res.status(500).json({ message: 'Ocurrió un error al procesar la solicitud.' });
 });
 
-app.listen(port, '127.0.0.1', () => {
-  console.log(`API VetChiloé disponible en http://127.0.0.1:${port}/api/pacientes`);
-  if (production) console.log(`Aplicación disponible en http://127.0.0.1:${port}`);
+app.listen(port, host, () => {
+  console.log(`API VetChiloé escuchando en ${host}:${port}`);
+  if (production) console.log(`Aplicación disponible en el puerto ${port}`);
 });
